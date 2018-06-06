@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>经典斗地主</title>
+    <link rel="stylesheet" type="text/css" href="./css/game.css">
+</head>
+<body>
+<!--整体界面div-->
+<div class="main">
+    <!--页面上半部，为其他玩家信息和出牌信息展示-->
+    <div class="top">
+        <!--左边玩家信息展示-->
+        <div class="left">
+            <div class="user">
+                <a class="username" href="javascript:void(0);">玩家1</a>
+                <div class="head-image">
+                    <div class="left-head"></div>
+                </div>
+                <div class="poker_length"></div>
+            </div>
+        </div>
+        <!--中间信息展示，包括底牌，低分，倍数和出牌信息-->
+        <div class="center">
+            <div class="message">
+                <div class="dipai">
+
+                </div>
+                <div class="s-store">
+                    <div class="multiple">
+                        <p>倍数 2</p>
+                    </div>
+                    <div class="money">
+                        <p >底分 1</p>
+                    </div>
+                </div>
+            </div>
+            <div class="table">
+                <div class="leftPlayerOut"></div>
+                <div class="centerPlayerOut"></div>
+                <div class="rightPlayerOut"></div>
+            </div>
+        </div>
+        <!--右边玩家信息展示-->
+        <div class="right">
+            <div class="user">
+                <a class="username" href="javascript:void(0);">玩家1</a>
+                <div class="head-image">
+                    <div class="right-head"></div>
+                </div>
+                <div class="poker_length"></div>
+            </div>
+        </div>
+    </div>
+    <!--页面下半部，主要为玩家牌面显示及操作-->
+    <div class="bottom">
+        <!--操作选项-->
+        <div class="bottom-top">
+            <div class="button" title="不出">
+                <div class="buttom-text">不出</div>
+            </div>
+            <div class="button" title="重选">
+                <div class="buttom-text">重选</div>
+            </div>
+            <div class="button" title="提示">
+                <div class="buttom-text">提示</div>
+            </div>
+            <div class="button" title="出牌">
+                <div class="buttom-text">出牌</div>
+            </div>
+        </div>
+        <!--玩家自己牌面的展示-->
+        <div class="bottom-bottom">
+            <!--玩家信息-->
+            <div class="user">
+                <a class="username" href="javascript:void(0);">玩家1</a>
+                <div class="head-image">
+                    <div class="bottom-head"></div>
+                </div>
+                <div class="poker_length"></div>
+            </div>
+            <!--玩家牌面，包括牌值和花色-->
+            <div class="mypokers">
+            </div>
+        </div>
+    </div>
+</div>
+<script src="js/ddz-main.js"></script>
+<script src="js/ddz-tool.js"></script>
+<script src="js/ddz-test.js"></script>
+</body>
+</html>
