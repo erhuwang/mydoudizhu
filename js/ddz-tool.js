@@ -99,7 +99,7 @@ Poker.prototype.fapai = function (players) {
         if(players[i].isMe) {
             players[i].setPokers(playerPokers[i]);
         } else {
-            players[i].setPokersLength(playerPokers[i].length);
+            players[i].setPokers(playerPokers[i].length);
         }
     }
     return players;
@@ -150,23 +150,16 @@ Player.prototype = {
         this.role = role;
     },
     /**
-     * 设置牌组
+     * 设置牌组,如果为非本人则设置牌组长度
      * @param arr
      */
     setPokers : function (arr) {
         if(this.isMe) {
             this.pokers = arr;
             this.pokersLength = this.pokers.length;
+            return;
         }
-    },
-    /**
-     * 设置玩家陪牌组长度，用于设置非本人玩家牌组长度
-     * @param len
-     */
-    setPokersLength : function(len) {
-        if(!this.isMe) {
-            this.pokersLength = len;
-        }
+        this.pokersLength = arr;
     },
     /**
      * 将手牌排序
@@ -215,18 +208,7 @@ Player.prototype = {
                 doc.setAttribute("data-choose","false");
                 doc.style.left = left +"px";
                 left += 40;
-                doc.addEventListener("click",function (e) {
-                    e = e || window.event; 　//标准化事件对象（W3C DOM 和IE DOM ）
-                    var t = e.currentTarget || e.srcElement; //标准化事件对象属性<引起事件的元素>
-                    // console.log(t);
-                    if("false" == t.getAttribute("data-choose")) {
-                        t.setAttribute("data-choose","true");
-                        // t.style.bottom = "25px";
-                    } else {
-                        t.setAttribute("data-choose","false");
-                        // t.style.bottom = "3px";
-                    }
-                });
+                doc.addEventListener("click",onPokersClick);
                 this.decoratePoker(doc,sortedPokers[i]);
                 mypokers.appendChild(doc);
             }
@@ -372,41 +354,60 @@ Player.prototype = {
         var rightDoc = getDocByCN("rightPlayerOut")[0];
         centerDoc.innerHTML = '';
         rightDoc.innerHTML = '';
-        centerDoc.innerHTML = '';
+        leftDoc.innerHTML = '';
         var outPokers = this.sortPokers(arr);
-        if(this.localChair == 'center') {
-            var left = 0;
-            if(outPokers.length < 12) {
-                left = (540 - 100 - (outPokers.length - 1) * 40)/2;
+        var left = 0;
+        var top = 0;
+        if(this.localChair == 'center' && outPokers.length < 12) {
+            left = (540 - 100 - (outPokers.length - 1) * 40)/2;
+        }
+        if(this.localChair == 'right' && outPokers.length < 12) {
+            left = (540 - 100 - (outPokers.length - 1) * 40);
+        }
+        // console.log(left);
+        for(var i in outPokers) {
+            var poker = document.createElement('div');
+            if(i != 0 && i%12 == 0) {
+                left = 0;
+                top += 50;
             }
-            // console.log(left);
-            var top = -50;
-            for(var i in outPokers) {
-                var poker = document.createElement('div');
-                if(i%12 == 0) {
-                    top += 50;
-                }
-                poker.className='OutPokers';
-                poker.style.left = left +"px";
-                poker.style.top = top + "px";
-                left += 40;
-                this.decoratePoker(poker,outPokers[i]);
+            poker.className='OutPokers';
+            poker.style.left = left +"px";
+            poker.style.top = top + "px";
+            left += 40;
+            this.decoratePoker(poker,outPokers[i]);
+            if(this.localChair == 'center') {
                 centerDoc.appendChild(poker);
+                continue;
             }
+            if(this.localChair == 'left') {
+                leftDoc.appendChild(poker);
+                continue;
+            }
+            rightDoc.appendChild(poker);
         }
     },
     /**
      * 出牌
      */
     chupai : function () {
-        //1.获得选中的牌
-        var choosedPokers = getPokersByChoose('mypoker','true');
-        //2.从手牌中删除选中的牌，并重新show手牌
-       this.setPokers(removeArr(this.pokers,choosedPokers));
-       this.showMyPokers();
-       //3.show打出的牌
-        this.showOutPokers(choosedPokers);
-
+        if(this.isMe) {
+            //1.获得选中的牌
+            var choosedPokers = getPokersByChoose('mypoker','true');
+            //2.从手牌中删除选中的牌，并重新show手牌
+            this.setPokers(removeArr(this.pokers,choosedPokers));
+            this.showMyPokers();
+            //3.show打出的牌
+            this.showOutPokers(choosedPokers);
+            return;
+        }
+        //如果不是自己出牌，为其他玩家出牌
+        //1.show打出的牌
+        this.showOutPokers(arguments[0]);
+        //2. 计算手牌剩余数量
+        this.setPokers(this.pokersLength - arguments[0].length);
+        //3. 更新余牌数量
+        this.showMyPokers();
     }
 }
 
@@ -463,7 +464,21 @@ function getPokersByChoose(cName,choose) {
 }
 
 /**
- * 从一个数组中删除另一个数组
+ * 重置choosed的牌
+ * @param cName
+ * @param choose
+ */
+function resetChoosedPokers(cName,choose) {
+    var docList = getDocByCN(cName);
+    for(var i = 0; i < docList.length; i++) {
+        if(choose == docList[i].getAttribute('data-choose')) {
+            docList[i].setAttribute("data-choose","false");
+        }
+    }
+}
+
+/**
+ * 从一个数组中删除另一个数组，两个数组都是从大到小排序后的数组
  * @param myarr
  */
 function removeArr(myarr,arr) {
@@ -473,7 +488,7 @@ function removeArr(myarr,arr) {
         for(var j in arr) {
             if(arr[j] == myarr[i]) {
                 spliceArr.push(i);
-                continue;
+                break;
             }
         }
     }
@@ -484,3 +499,31 @@ function removeArr(myarr,arr) {
     return myarr;
 }
 
+/**
+ * 为mypoker添加点击事件
+ * @param e
+ */
+function onPokersClick(e) {
+    e = e || window.event; 　//标准化事件对象（W3C DOM 和IE DOM ）
+    var t = e.currentTarget || e.srcElement; //标准化事件对象属性<引起事件的元素>
+    // console.log(t);
+    if("false" == t.getAttribute("data-choose")) {
+        t.setAttribute("data-choose","true");
+        // t.style.bottom = "25px";
+    } else {
+        t.setAttribute("data-choose","false");
+        // t.style.bottom = "3px";
+    }
+}
+// function onPokersUp(e) {
+//     e = e || window.event; 　//标准化事件对象（W3C DOM 和IE DOM ）
+//     var t = e.currentTarget || e.srcElement; //标准化事件对象属性<引起事件的元素>
+//     console.log(t);
+//     if("false" == t.getAttribute("data-choose")) {
+//         t.setAttribute("data-choose","true");
+//         // t.style.bottom = "25px";
+//     } else {
+//         t.setAttribute("data-choose","false");
+//         // t.style.bottom = "3px";
+//     }
+// }

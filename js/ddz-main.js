@@ -1,6 +1,6 @@
 
-function Game(player1,player2,player3) {
-    this.players = [player1,player2,player3];
+function Game() {
+    this.players = new Array(3);
 }
 Game.prototype = {
     initGame : function() {
@@ -8,13 +8,16 @@ Game.prototype = {
         getDocByTitle('button','出牌').addEventListener("click", function () {
             game.players[game.myChair].chupai();
         });
+        getDocByTitle('button','重选').addEventListener("click",function () {
+            resetChoosedPokers('mypoker','true');
+        })
     },
     /**
      * 设置每个玩家的chair,同时设定本地chair
      */
     setPlayerChair : function() {
         for(var i in this.players) {
-            this.players[i].setChair(i);
+            this.players[i].setChair(parseInt(i));
             if(this.players[i].isMe) {
                 this.myChair = parseInt(i);
             }
@@ -24,14 +27,17 @@ Game.prototype = {
         }
     },
     /**
-     * 设置玩家，如果有玩家离开桌子
+     * 设置玩家，如果有玩家离开桌子或玩家不足三人
      * @param player
      */
     setPlayers : function (player) {
-        for(var i in this.players) {
-            if(this.players[i] == null) {
+        /*console.log(player);
+        console.log(this.players.length);*/
+        for(var i = 0; i < this.players.length; i++) {
+            if(this.players[i] == null || this.players[i] == '') {
                 this.players[i] = player;
                 player.setChair(i);
+                break;
             }
         }
     },
@@ -80,3 +86,4 @@ Game.prototype = {
     },
 
 }
+var game = new Game();
